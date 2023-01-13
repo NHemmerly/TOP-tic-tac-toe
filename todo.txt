@@ -1,0 +1,35 @@
+1. Fix turn-taking functionality of gameflow
+    a. The playGame function is only called once using player1 as its
+    argument. 
+
+    [ , , ] [1,2,3] [0,1,1]
+    [ , , ] [2,2,3] [1,0,0]
+    [ , , ] [3, ,3] [0,0,1]
+
+2. Map DOM elements to gameArray to detect a win or draw.
+
+algorithm psuedocode for finding winner after each move:
+    (placeGamePiece)
+    check columns 1,0,0,1,0,0,1,0,0 [0,3,6] [2,4,7] [3,5,8]
+    check rows 1,1,1,0,0,0,0,0,0,0 [0,1,2] [3,4,5] [6,7,8]
+    check diags 1,0,0,0,1,0,0,0,1 [0, 4, 8] [2, 4, 6]
+
+    0,1,2,3,4,5,6,7,8
+
+    const columns = [[0,3,6], [2,4,7], [3,5,8]] [0,1,2]
+    const rows = [[0,1,2], [3,4,5], [6,7,8]]    [3,4,5]
+    const diags = [[0, 4, 8], [2, 4, 6]]        [6,7,8]
+
+    for columns
+        iterate through game array indices based on each column array
+        if gameArray[col[0][0], 3, 6] not equal to prevturn
+    
+    for (col of cols)
+        count = 0 
+        for (cell of col)
+            if gameArray[cell] == prevTurn
+            count++;
+        if (count === 3)
+            return winner;
+
+3. 

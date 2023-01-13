@@ -1,0 +1,60 @@
+@import "normalize.css";
+
+/* Stylesheet for TOP-tic-tac-toe */
+
+:root {
+    --nav-bg: #64748b;
+    --game-bg: #cbd5e1;
+    --light-text: #f8fafc;
+}
+
+html, 
+body,
+#main {
+    background-color: var(--game-bg);
+    height: 100vh;
+    width: 100vw;
+    padding: 0;
+}
+
+h2 {
+    height: 92px;
+}
+
+.navbar {
+    background-color: var(--nav-bg);
+    color: var(--light-text);
+}
+
+#choose-name {
+    width: 80vw;
+    justify-content: space-between;
+}
+
+#players {
+    padding-top: 1rem;
+}
+
+.player-input {
+    display: flex;
+    flex-direction: column;
+    width: 80%;
+}
+
+.grid {
+    display: grid;
+    width: min(700px, 70vw);
+    height: min(700px, 70vw);
+    margin: auto;
+    gap: 5px;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+}
+
+.game-cell {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: var(--light-text);
+    font-size: 48px;
+}
