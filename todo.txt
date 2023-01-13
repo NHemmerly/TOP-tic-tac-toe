@@ -32,4 +32,5 @@ algorithm psuedocode for finding winner after each move:
         if (count === 3)
             return winner;
 
-3. 
+3. Functiont that stops the game when a win or drsaw is detected in checkwin
+    a. causes a reset button to appear
