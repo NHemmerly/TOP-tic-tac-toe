@@ -35,7 +35,7 @@ const displayController = (function () {
 			return name;
 		},
     displayWinner: function(winner) {
-      dim.style.setProperty
+      dim.style.display = "block";
     },
 		gameCells
 	};
