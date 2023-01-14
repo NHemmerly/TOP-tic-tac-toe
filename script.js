@@ -10,6 +10,8 @@ const displayController = (function () {
 	const submit1 = document.getElementById('submit1');
 	const submit2 = document.getElementById('submit2');
   const dim = document.getElementById('dim');
+  const winner = document.getElementById('display-winner');
+  const postGame = document.querySelector(".winner-play-game");
 
 	function _setPlayerName(e, playerName, playerForm, def) {
 		e.preventDefault();
@@ -34,8 +36,10 @@ const displayController = (function () {
 			} 
 			return name;
 		},
-    displayWinner: function(winner) {
+    displayWinner: function(result) {
       dim.style.display = "block";
+      postGame.style.display = "block";
+      winner.innerText = result;
     },
 		gameCells
 	};
@@ -109,7 +113,9 @@ const gameBoard = (function () {
 				}
 		}
 
-    return 2;
+    if (!(gameArray.includes(''))) {
+      return 2;
+    }
 	}
 
 	function currentPlayer() {
@@ -122,23 +128,36 @@ const gameBoard = (function () {
 		}
 	}
 
-	function placeGamePiece(e) {
-
-		if (e.target.innerText === '') {
-			e.target.innerText = currentPlayer().gamePiece;
-		}
-    const winner = check(updateArray(updateArray(placeGamePiece())));
-    endGame(winner);
-	}
-
   function endGame(winner) {
+    switch (winner) {
+      case (0):
+        displayController.displayWinner(`${player1.name} Wins!`);
+        break;
+      case (1):
+        displayController.displayWinner(`${player2.name} Wins!`);
+        break;
+      case (2):
+        displayController.displayWinner(`Draw`);
+        break;
+      }
+  }
 
+  function placeGamePiece(e) {
+    const clickedId = e.target.id;
+    const clickedBox = document.getElementById(clickedId);
+
+    if (!(clickedBox.innerText === 'X' || clickedBox.innerText === 'O')) {
+      e.target.innerText = currentPlayer().gamePiece;
+    }
+    updateArray(clickedId)
+    console.log(check(prevTurn));
+    endGame(check(prevTurn));
   }
   
 	function gameFlow() {
     displayController.gameCells
     .forEach(cell => cell
-			.addEventListener('click', placeGamePiece));
+			.addEventListener('click', (e) => placeGamePiece(e)));
 		} 
 
 	return {
