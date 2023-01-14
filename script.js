@@ -17,6 +17,9 @@ const displayController = (function () {
   const winner = document.getElementById('display-winner');
   const postGame = document.querySelector(".winner-play-game");
 
+  const playAgain = document.getElementById("play-again");
+  const reset = document.getElementById("reset");
+
   const player1 = player('Player X', 'X');
   const player2 = player('Player O', 'O');
 
@@ -44,7 +47,6 @@ const displayController = (function () {
 
 	submit1.addEventListener('click', (e) => _setPlayerName(e, input1.value, player1Form, player1));
 	submit2.addEventListener('click', (e) => _setPlayerName(e, input2.value, player2Form, player2));
-
   
 	return {
     autoName: function(player) {
@@ -55,6 +57,13 @@ const displayController = (function () {
       postGame.style.display = "block";
       winner.innerText = result;
     },
+    resetDisplay: function() {
+      dim.style.display = "none";
+      postGame.style.display = "none";
+      gameCells.forEach(cell => cell.innerText = '');
+    },
+    playAgain,
+    reset,
 		gameCells,
     player1,
     player2
@@ -70,14 +79,30 @@ const gameBoard = (function () {
   let player2 = displayController.player2;
 	
 	let prevTurn = 1;
+
+  function _resetArray() {
+    gameArray = [...Array(9).fill('')];
+    prevTurn = 1;
+    displayController.resetDisplay();
+  }
+
+  function _resetGame(e) {
+    e.preventDefault();
+    _resetArray();
+  }
+
+  function _playGameAgain(e) {
+    e.preventDefault();
+    _resetArray();
+  }
 	
-	function updateArray(cellId) {
+	function _updateArray(cellId) {
 		gameArray[parseInt(cellId)] = prevTurn;
 		console.log(gameArray);
 		return prevTurn;
 	}
 	
-	function check(prevTurn) {
+	function _check(prevTurn) {
 		const cols = [[0,3,6], [1,4,7], [2,5,8]];
 		const rows = [[0,1,2], [3,4,5], [6,7,8]];
 		const diag = [[0, 4, 8], [2, 4, 6]];
@@ -127,7 +152,7 @@ const gameBoard = (function () {
     }
 	}
 
-	function currentPlayer() {
+	function _currentPlayer() {
 		if (prevTurn === 1) {
 			prevTurn = 0;
 			return player1;
@@ -137,7 +162,7 @@ const gameBoard = (function () {
 		}
 	}
 
-  function endGame(winner) {
+  function _endGame(winner) {
     switch (winner) {
       case (0):
         displayController.displayWinner(`${player1.name} Wins!`);
@@ -151,29 +176,31 @@ const gameBoard = (function () {
       }
   }
 
-  function placeGamePiece(e) {
+  function _placeGamePiece(e) {
     const clickedId = e.target.id;
     const clickedBox = document.getElementById(clickedId);
 
     if (!(clickedBox.innerText === 'X' || clickedBox.innerText === 'O')) {
-      e.target.innerText = currentPlayer().gamePiece;
+      e.target.innerText = _currentPlayer().gamePiece;
     }
     displayController.autoName(player1);
     displayController.autoName(player2);
-    updateArray(clickedId)
-    console.log(check(prevTurn));
-    endGame(check(prevTurn));
+    _updateArray(clickedId)
+    _endGame(_check(prevTurn));
   }
   
-	function gameFlow() {
+	function _gameFlow() {
     displayController.gameCells
     .forEach(cell => cell
-			.addEventListener('click', (e) => placeGamePiece(e)));
-		} 
+			.addEventListener('click', (e) => _placeGamePiece(e)));
+		}
+    
+  displayController.playAgain.addEventListener('click', _resetGame);
+  displayController.reset.addEventListener('click', _playGameAgain);
 
 	return {
 		playGame: function() {
-			gameFlow();
+			_gameFlow();
 		}
 	}
 	
