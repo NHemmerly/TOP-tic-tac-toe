@@ -9,6 +9,7 @@ const displayController = (function () {
 	const player2Form = document.getElementById('form2');
 	const submit1 = document.getElementById('submit1');
 	const submit2 = document.getElementById('submit2');
+  const dim = document.getElementById('dim');
 
 	function _setPlayerName(e, playerName, playerForm, def) {
 		e.preventDefault();
@@ -33,6 +34,9 @@ const displayController = (function () {
 			} 
 			return name;
 		},
+    displayWinner: function(winner) {
+      dim.style.setProperty
+    },
 		gameCells
 	};
 
@@ -57,53 +61,55 @@ const gameBoard = (function () {
 	function updateArray(cellId) {
 		gameArray[parseInt(cellId)] = prevTurn;
 		console.log(gameArray);
-		check(prevTurn);
+		return prevTurn;
 	}
 	
 	function check(prevTurn) {
-	const cols = [[0,3,6], [1,4,7], [2,5,8]];
-	const rows = [[0,1,2], [3,4,5], [6,7,8]];
-	const diag = [[0, 4, 8], [2, 4, 6]];
-	let count = 0;
+		const cols = [[0,3,6], [1,4,7], [2,5,8]];
+		const rows = [[0,1,2], [3,4,5], [6,7,8]];
+		const diag = [[0, 4, 8], [2, 4, 6]];
+		let count = 0;
 
-	//Columns
-	for (let col of cols) {
-		count = 0;
-		for (let cell of col) {
-			if (gameArray[cell] === parseInt(prevTurn)){
-			count++;
+		//Columns
+		for (let col of cols) {
+			count = 0;
+			for (let cell of col) {
+				if (gameArray[cell] === parseInt(prevTurn)){
+				count++;
+				}
+			}	
+			if (count === 3) {
+				return prevTurn;
 			}
-		}	
-		if (count === 3) {
-			console.log(prevTurn);
 		}
-	}
 
-	//Rows
-	for (let row of rows) {
-		count = 0;
-		for (let cell of row) {
-			if (gameArray[cell] === parseInt(prevTurn)){
-			count++;
+		//Rows
+		for (let row of rows) {
+			count = 0;
+			for (let cell of row) {
+				if (gameArray[cell] === parseInt(prevTurn)){
+				count++;
+				}
+			}
+			if (count === 3) {
+        return prevTurn;
 			}
 		}
-		if (count === 3) {
-			console.log(prevTurn);
-		}
-	}
 
-	//Diags
-	for (let dia of diag) {
-		count = 0;
-		for (let cell of dia) {
-			if (gameArray[cell] === parseInt(prevTurn)){
-			count++;
+		//Diags
+		for (let dia of diag) {
+			count = 0;
+			for (let cell of dia) {
+				if (gameArray[cell] === parseInt(prevTurn)){
+				count++;
+				}
 			}
+			if (count === 3) {
+        return prevTurn;
+				}
 		}
-		if (count === 3) {
-			console.log(prevTurn);
-			}
-		}
+
+    return 2;
 	}
 
 	function currentPlayer() {
@@ -121,16 +127,19 @@ const gameBoard = (function () {
 		if (e.target.innerText === '') {
 			e.target.innerText = currentPlayer().gamePiece;
 		}
-		updateArray(e.target.id);
+    const winner = check(updateArray(updateArray(placeGamePiece())));
+    endGame(winner);
 	}
-	
 
-	
+  function endGame(winner) {
+
+  }
+  
 	function gameFlow() {
-		displayController.gameCells
-			.forEach(cell => cell
+    displayController.gameCells
+    .forEach(cell => cell
 			.addEventListener('click', placeGamePiece));
-		}; 
+		} 
 
 	return {
 		playGame: function() {
