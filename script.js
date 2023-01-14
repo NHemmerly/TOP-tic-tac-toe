@@ -1,7 +1,11 @@
 //Javascript code for TOP-Tic-Tac-Toe
-const displayController = (function () {
 
-	let name = '';
+const player = (name, gamePiece) => {
+  return {name, gamePiece}; 
+}
+
+const displayController = (function () {
+  
 	const input1 = document.getElementById('name1');
 	const input2 = document.getElementById('name2');
 	const gameCells = document.querySelectorAll('.game-cell');
@@ -13,55 +17,48 @@ const displayController = (function () {
   const winner = document.getElementById('display-winner');
   const postGame = document.querySelector(".winner-play-game");
 
-	function _setPlayerName(e, playerName, playerForm, def) {
-		e.preventDefault();
+  const player1 = player('Player X', 'X');
+  const player2 = player('Player O', 'O');
+
+	function _setPlayerName(e, playerName, playerForm, player) {
+    e.preventDefault();
 		const playerHeader = document.createElement('h2');
 		if (playerName == '') {
-			playerHeader.innerText = `Player ${def}`;
+			playerHeader.innerText = `Player ${player.gamePiece}`;
 		} else {
 			playerHeader.innerText = `${playerName}`;
 		}
+    player.name = playerName;
 		playerForm.replaceWith(playerHeader);
+
 	}
 
-	let player1Name = submit1.addEventListener('click', (e) => _setPlayerName(e, input1.value, player1Form, 'X'));
-	let player2Name = submit2.addEventListener('click', (e) => _setPlayerName(e, input2.value, player2Form, 'O'));
+	submit1.addEventListener('click', (e) => _setPlayerName(e, input1.value, player1Form, player1));
+	submit2.addEventListener('click', (e) => _setPlayerName(e, input2.value, player2Form, player2));
 
+  
 	return {
-		getPlayerName: function(playerName) {
-			if (playerName === 'player1') {
-				name = ((input1.value === '') ? 'Player X' : input1.value);
-			} else if (playerName === 'player2') {
-				name = ((input2.value === '') ? 'Player O' : input2.value);
-			} 
-			return name;
-		},
     displayWinner: function(result) {
       dim.style.display = "block";
       postGame.style.display = "block";
       winner.innerText = result;
     },
-		gameCells
+		gameCells,
+    player1,
+    player2
 	};
 
 }());
 
-const player = (name, gamePiece) => {
-	return {name, gamePiece}; 
-}
 
 const gameBoard = (function () {
 	let gameArray = [...Array(9).fill('')];
+
+  let player1 = displayController.player1;
+  let player2 = displayController.player2;
 	
-	let name1 = displayController.getPlayerName('player1');
-	let name2 = displayController.getPlayerName('player2');
 	let prevTurn = 1;
 	
-	const player1 = player(name1, 'X');
-	const player2 = player(name2, 'O');
-	
-	
-		
 	function updateArray(cellId) {
 		gameArray[parseInt(cellId)] = prevTurn;
 		console.log(gameArray);
