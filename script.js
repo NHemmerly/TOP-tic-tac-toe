@@ -30,14 +30,26 @@ const displayController = (function () {
 		}
     player.name = playerName;
 		playerForm.replaceWith(playerHeader);
-
 	}
+
+  function _autoPlayerName(player) {
+    const playerHeader = document.createElement('h2');
+		playerHeader.innerText = `Player ${player.gamePiece}`;
+    if(player.gamePiece === 'X') {
+      player1Form.replaceWith(playerHeader);
+    } else {
+      player2Form.replaceWith(playerHeader);
+    }
+  }
 
 	submit1.addEventListener('click', (e) => _setPlayerName(e, input1.value, player1Form, player1));
 	submit2.addEventListener('click', (e) => _setPlayerName(e, input2.value, player2Form, player2));
 
   
 	return {
+    autoName: function(player) {
+      _autoPlayerName(player);
+    },
     displayWinner: function(result) {
       dim.style.display = "block";
       postGame.style.display = "block";
@@ -146,6 +158,8 @@ const gameBoard = (function () {
     if (!(clickedBox.innerText === 'X' || clickedBox.innerText === 'O')) {
       e.target.innerText = currentPlayer().gamePiece;
     }
+    displayController.autoName(player1);
+    displayController.autoName(player2);
     updateArray(clickedId)
     console.log(check(prevTurn));
     endGame(check(prevTurn));
