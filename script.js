@@ -1,7 +1,7 @@
 //Javascript code for TOP-Tic-Tac-Toe
 
-const player = (name, gamePiece, score) => {
-  return {name, gamePiece, score}; 
+const player = (name, gamePiece, score, bin) => {
+  return {name, gamePiece, score, bin}; 
 }
 
 const displayController = (function () {
@@ -27,8 +27,8 @@ const displayController = (function () {
   const playAgain = document.getElementById("play-again");
   const reset = document.getElementById("reset");
 
-  const player1 = player('Player X', 'X', 0);
-  const player2 = player('Player O', 'O', 0);
+  const player1 = player('Player X', 'X', 0, 0);
+  const player2 = player('Player O', 'O', 0, 1);
 
 	function _setPlayerName(e, playerName, playerForm, player, display, score) {
     e.preventDefault();
@@ -58,6 +58,9 @@ const displayController = (function () {
   }
 
   function _updateScore(player) {
+    if (player == null) {
+      return
+    }
     if (player.gamePiece === 'X') {
       score1.innerText = `Score: ${player.score}`;
     } else {
@@ -195,40 +198,36 @@ const gameBoard = (function () {
   }
 
   function _minimax(goodBoard, depth, isMaximizing) {
-    if (_check(prevTurn) === 0) {
-      return 100;
-    } else if (_check(prevTurn) === 1) {
-      return -100;
+    if (_check(player1.bin) === 0) {
+      return 1;
+    } else if (_check(player2.bin) === 1) {
+      return -1;
     } else if (_check(prevTurn) === 2) {
       return 0;
     } 
 
     if (isMaximizing === true) {
-      let bestScore = 1000;
+      let bestScore = -Infinity;
 
       for (let i = 0; i < goodBoard.length; i++) {
-        if (goodBoard[i] == " ") {
-          goodBoard[i] = prevTurn;
+        if (goodBoard[i] === " ") {
+          goodBoard[i] = player1.bin;
           let score = _minimax(goodBoard, depth + 1, false);
           goodBoard[i] = " ";
-          if(score > bestScore) {
-            bestScore = score;
-          }
+          bestScore = Math.max(score, bestScore);
         }
       }
       return bestScore;
     }
     else {
-      let bestScore = -1000;
+      let bestScore = Infinity;
 
       for (let i = 0; i < goodBoard.length; i++) {
-        if (goodBoard[i] == " ") {
-          goodBoard[i] = prevTurn;
-          let score = _minimax(goodBoard, depth + 1, false);
+        if (goodBoard[i] === " ") {
+          goodBoard[i] = player2.bin;
+          let score = _minimax(goodBoard, depth + 1, true);
           goodBoard[i] = " ";
-          if(score < bestScore) {
-            bestScore = score;
-          }
+          bestScore = Math.min(score, bestScore);
         }
       }
       return bestScore;
@@ -236,20 +235,14 @@ const gameBoard = (function () {
   }
 
   function _bestAiMove(piece) {
-    let bestScore = -1;
-    let bestMove = 1;
-    let board = gameArray;
-    let isMaximizing = false;
-    if(piece == 'X') {
-      isMaximizing = true;
-    } else {
-      isMaximizing = false;
-    }
-    for (let i = 0; i < board.length; i++) {
-      if (board[i] == " ") {
-        board[i] = prevTurn;
-        let score = _minimax(board, 0, isMaximizing);
-        board[i] = " ";
+    let bestScore = -Infinity;
+    let bestMove;
+
+    for (let i = 0; i < gameArray.length; i++) {
+      if (gameArray[i] === " ") {
+        gameArray[i] = player1.bin;
+        let score = _minimax(gameArray, 0, false);
+        gameArray[i] = " ";
         if(score > bestScore) {
           bestScore = score;
           bestMove = i;
@@ -257,12 +250,10 @@ const gameBoard = (function () {
       }
     }
 
-      if (_updateArray(bestMove)) {
-        const aiDom = document.getElementById(String(bestMove));
-        aiDom.innerText = piece;
-      }
-      _endGame(_check(prevTurn));
-      return;
+    _updateArray(bestMove);
+    const aiDom = document.getElementById(String(bestMove));
+    aiDom.innerText = piece;
+    _endGame(_check(prevTurn));
   }
   
   function _resetArray() {
@@ -326,7 +317,7 @@ const gameBoard = (function () {
         displayController.displayWinner(`${player2.name} Wins!`, player2);
         break;
       case (2):
-        displayController.displayWinner(`Draw`);
+        displayController.displayWinner(`Draw`, null);
         break;
       }
   }
@@ -346,6 +337,7 @@ const gameBoard = (function () {
         let piece = _currentPlayer().gamePiece;
         if (aiBest === true) {
           _bestAiMove(piece);
+          console.log(gameArray);
         } else {
           _aiMove(piece);
         }
