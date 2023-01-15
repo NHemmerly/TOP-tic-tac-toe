@@ -45,12 +45,12 @@ const displayController = (function () {
     if(player.gamePiece === 'X') {
       player1Form.style.display = "none";
       score1.style.display = "block";
-      display1.innerText = `Player ${player.gamePiece}`;
+      display1.innerText = player.name;
       display1.style.display = 'block';
     } else {
       player2Form.style.display = "none";
       score2.style.display = "block";
-      display2.innerText = `Player ${player.gamePiece}`;
+      display2.innerText = player.name;
       display2.style.display = 'block';
     }
   }
