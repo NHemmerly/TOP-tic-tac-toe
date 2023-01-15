@@ -106,18 +106,19 @@ const displayController = (function () {
 
 
 const gameBoard = (function () {
-	let gameArray = [...Array(9).fill('')];
+	let gameArray = [...Array(9).fill(" ")];
 
   let player1 = displayController.player1;
   let player2 = displayController.player2;
 	
 	let prevTurn = 1;
   let aiMode = false;
-  let currentAi = null;
+  let currentAi = " ";
+  let aiBest = true;
 
   
   function _updateArray(cellId) {
-    if (gameArray[parseInt(cellId)] === '') {
+    if (gameArray[parseInt(cellId)] === " ") {
       gameArray[parseInt(cellId)] = prevTurn;
       return true;
     }
@@ -132,6 +133,56 @@ const gameBoard = (function () {
     }
   }
 
+  function _check(prevTurn) {
+    const cols = [[0,3,6], [1,4,7], [2,5,8]];
+    const rows = [[0,1,2], [3,4,5], [6,7,8]];
+    const diag = [[0, 4, 8], [2, 4, 6]];
+    let count = 0;
+
+    //Columns
+    for (let col of cols) {
+      count = 0;
+      for (let cell of col) {
+        if (gameArray[cell] === parseInt(prevTurn)){
+        count++;
+        }
+      }	
+      if (count === 3) {
+        return prevTurn;
+      }
+    }
+
+    //Rows
+    for (let row of rows) {
+      count = 0;
+      for (let cell of row) {
+        if (gameArray[cell] === parseInt(prevTurn)){
+        count++;
+        }
+      }
+      if (count === 3) {
+        return prevTurn;
+      }
+    }
+
+    //Diags
+    for (let dia of diag) {
+      count = 0;
+      for (let cell of dia) {
+        if (gameArray[cell] === parseInt(prevTurn)){
+        count++;
+        }
+      }
+      if (count === 3) {
+        return prevTurn;
+        }
+    }
+
+    if (!(gameArray.includes(" "))) {
+      return 2;
+    }
+  }
+
   function _aiMove(piece) {
     let move = Math.floor(Math.random() * 9);
     if ((_updateArray(move))) {
@@ -143,8 +194,79 @@ const gameBoard = (function () {
     }
   }
 
+  function _minimax(goodBoard, depth, isMaximizing) {
+    if (_check(prevTurn) === 0) {
+      return 100;
+    } else if (_check(prevTurn) === 1) {
+      return -100;
+    } else if (_check(prevTurn) === 2) {
+      return 0;
+    } 
+
+    if (isMaximizing === true) {
+      let bestScore = 1000;
+
+      for (let i = 0; i < goodBoard.length; i++) {
+        if (goodBoard[i] == " ") {
+          goodBoard[i] = prevTurn;
+          let score = _minimax(goodBoard, depth + 1, false);
+          goodBoard[i] = " ";
+          if(score > bestScore) {
+            bestScore = score;
+          }
+        }
+      }
+      return bestScore;
+    }
+    else {
+      let bestScore = -1000;
+
+      for (let i = 0; i < goodBoard.length; i++) {
+        if (goodBoard[i] == " ") {
+          goodBoard[i] = prevTurn;
+          let score = _minimax(goodBoard, depth + 1, false);
+          goodBoard[i] = " ";
+          if(score < bestScore) {
+            bestScore = score;
+          }
+        }
+      }
+      return bestScore;
+    }
+  }
+
+  function _bestAiMove(piece) {
+    let bestScore = -1;
+    let bestMove = 1;
+    let board = gameArray;
+    let isMaximizing = false;
+    if(piece == 'X') {
+      isMaximizing = true;
+    } else {
+      isMaximizing = false;
+    }
+    for (let i = 0; i < board.length; i++) {
+      if (board[i] == " ") {
+        board[i] = prevTurn;
+        let score = _minimax(board, 0, isMaximizing);
+        board[i] = " ";
+        if(score > bestScore) {
+          bestScore = score;
+          bestMove = i;
+        }
+      }
+    }
+
+      if (_updateArray(bestMove)) {
+        const aiDom = document.getElementById(String(bestMove));
+        aiDom.innerText = piece;
+      }
+      _endGame(_check(prevTurn));
+      return;
+  }
+  
   function _resetArray() {
-    gameArray = [...Array(9).fill('')];
+    gameArray = [...Array(9).fill(" ")];
     prevTurn = 1;
     displayController.resetDisplay();
   }
@@ -182,58 +304,6 @@ const gameBoard = (function () {
     displayController.autoName(currentAi);
     aiMode = true;
   }
-
-	
-	
-	function _check(prevTurn) {
-		const cols = [[0,3,6], [1,4,7], [2,5,8]];
-		const rows = [[0,1,2], [3,4,5], [6,7,8]];
-		const diag = [[0, 4, 8], [2, 4, 6]];
-		let count = 0;
-
-		//Columns
-		for (let col of cols) {
-			count = 0;
-			for (let cell of col) {
-				if (gameArray[cell] === parseInt(prevTurn)){
-				count++;
-				}
-			}	
-			if (count === 3) {
-				return prevTurn;
-			}
-		}
-
-		//Rows
-		for (let row of rows) {
-			count = 0;
-			for (let cell of row) {
-				if (gameArray[cell] === parseInt(prevTurn)){
-				count++;
-				}
-			}
-			if (count === 3) {
-        return prevTurn;
-			}
-		}
-
-		//Diags
-		for (let dia of diag) {
-			count = 0;
-			for (let cell of dia) {
-				if (gameArray[cell] === parseInt(prevTurn)){
-				count++;
-				}
-			}
-			if (count === 3) {
-        return prevTurn;
-				}
-		}
-
-    if (!(gameArray.includes(''))) {
-      return 2;
-    }
-	}
 
 	function _currentPlayer() {
 		if (prevTurn === 1) {
@@ -274,7 +344,11 @@ const gameBoard = (function () {
       displayController.autoName(player2);
       if (_checkAi() === true) {
         let piece = _currentPlayer().gamePiece;
-        _aiMove(piece);
+        if (aiBest === true) {
+          _bestAiMove(piece);
+        } else {
+          _aiMove(piece);
+        }
         console.log(gameArray);
       }
     }
