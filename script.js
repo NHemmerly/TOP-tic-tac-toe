@@ -21,6 +21,9 @@ const displayController = (function () {
   const winner = document.getElementById('display-winner');
   const postGame = document.querySelector(".winner-play-game");
 
+  const aiX = document.getElementById('ai-x');
+  const aiO = document.getElementById('ai-o');
+ 
   const playAgain = document.getElementById("play-again");
   const reset = document.getElementById("reset");
 
@@ -34,7 +37,6 @@ const displayController = (function () {
 		} else {
 			display.innerText = `${playerName}`;
 		}
-    player.name = playerName;
     playerForm.reset();
     playerForm.style.display = "none";
     display.style.display = 'block';
@@ -129,7 +131,9 @@ const gameBoard = (function () {
   }
 	
 	function _updateArray(cellId) {
-		gameArray[parseInt(cellId)] = prevTurn;
+    if (gameArray[parseInt(cellId)] === '') {
+      gameArray[parseInt(cellId)] = prevTurn;
+    }
 		console.log(gameArray);
 		return prevTurn;
 	}
@@ -201,8 +205,8 @@ const gameBoard = (function () {
         displayController.displayWinner(`${player1.name} Wins!`, player1);
         break;
       case (1):
-        displayController.displayWinner(`${player2.name} Wins!`, player2);
         player2.score += 1;
+        displayController.displayWinner(`${player2.name} Wins!`, player2);
         break;
       case (2):
         displayController.displayWinner(`Draw`);
