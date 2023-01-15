@@ -97,7 +97,9 @@ const displayController = (function () {
     reset,
 		gameCells,
     player1,
-    player2
+    player2,
+    aiX,
+    aiO
 	};
 
 }());
@@ -110,13 +112,43 @@ const gameBoard = (function () {
   let player2 = displayController.player2;
 	
 	let prevTurn = 1;
+  let aiMode = false;
+  let currentAi = null;
+
+  
+  function _updateArray(cellId) {
+    if (gameArray[parseInt(cellId)] === '') {
+      gameArray[parseInt(cellId)] = prevTurn;
+      return true;
+    }
+    return false;
+  }
+  
+  function _checkAi() {
+    if (aiMode) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  function _aiMove(piece) {
+    let move = Math.floor(Math.random() * 9);
+    if ((_updateArray(move))) {
+      const aiDom = document.getElementById(String(move));
+      aiDom.innerText = piece;
+      _endGame(_check(prevTurn));
+    } else {
+      _aiMove(piece);      
+    }
+  }
 
   function _resetArray() {
     gameArray = [...Array(9).fill('')];
     prevTurn = 1;
     displayController.resetDisplay();
   }
-
+  
   function _resetGame(e) {
     e.preventDefault();
     player1.score = 0;
@@ -124,19 +156,34 @@ const gameBoard = (function () {
     displayController.resetPlayerInput();
     _resetArray();
   }
-
+  
   function _playGameAgain(e) {
     e.preventDefault();
     _resetArray();
-  }
-	
-	function _updateArray(cellId) {
-    if (gameArray[parseInt(cellId)] === '') {
-      gameArray[parseInt(cellId)] = prevTurn;
+    if (aiMode === true && currentAi.name === "ai-x") {
+      _aiMove(_currentPlayer().gamePiece);
     }
-		console.log(gameArray);
-		return prevTurn;
-	}
+  }
+  
+  function _enableAi(e) {
+    e.preventDefault();
+    const aiName = e.target.id;
+    if (aiName == 'ai-x') {
+      currentAi = player1;
+      currentAi.name = aiName;
+      displayController.autoName(currentAi);
+      _aiMove(_currentPlayer().gamePiece);
+    } else {
+      currentAi = player2;
+      currentAi.name = aiName;
+      displayController.autoName(currentAi);
+    }
+    currentAi.name = aiName;
+    displayController.autoName(currentAi);
+    aiMode = true;
+  }
+
+	
 	
 	function _check(prevTurn) {
 		const cols = [[0,3,6], [1,4,7], [2,5,8]];
@@ -220,11 +267,17 @@ const gameBoard = (function () {
 
     if (!(clickedBox.innerText === 'X' || clickedBox.innerText === 'O')) {
       e.target.innerText = _currentPlayer().gamePiece;
+      _updateArray(clickedId);
+      console.log(gameArray);
+      _endGame(_check(prevTurn));
+      displayController.autoName(player1);
+      displayController.autoName(player2);
+      if (_checkAi() === true) {
+        let piece = _currentPlayer().gamePiece;
+        _aiMove(piece);
+        console.log(gameArray);
+      }
     }
-    displayController.autoName(player1);
-    displayController.autoName(player2);
-    _updateArray(clickedId)
-    _endGame(_check(prevTurn));
   }
   
 	function _gameFlow() {
@@ -235,6 +288,8 @@ const gameBoard = (function () {
     
   displayController.reset.addEventListener('click', _resetGame);
   displayController.playAgain.addEventListener('click', _playGameAgain);
+  displayController.aiX.addEventListener('click', _enableAi);
+  displayController.aiO.addEventListener('click', _enableAi);
 
 	return {
 		playGame: function() {
