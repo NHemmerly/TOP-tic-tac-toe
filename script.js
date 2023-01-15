@@ -1,7 +1,7 @@
 //Javascript code for TOP-Tic-Tac-Toe
 
-const player = (name, gamePiece) => {
-  return {name, gamePiece}; 
+const player = (name, gamePiece, score) => {
+  return {name, gamePiece, score}; 
 }
 
 const displayController = (function () {
@@ -10,7 +10,11 @@ const displayController = (function () {
 	const input2 = document.getElementById('name2');
 	const gameCells = document.querySelectorAll('.game-cell');
 	const player1Form = document.getElementById('form1');
+  const display1 = document.getElementById('x');
+  const score1 = document.getElementById('x-score');
 	const player2Form = document.getElementById('form2');
+  const display2 = document.getElementById('o');
+  const score2 = document.getElementById('o-score');
 	const submit1 = document.getElementById('submit1');
 	const submit2 = document.getElementById('submit2');
   const dim = document.getElementById('dim');
@@ -20,47 +24,72 @@ const displayController = (function () {
   const playAgain = document.getElementById("play-again");
   const reset = document.getElementById("reset");
 
-  const player1 = player('Player X', 'X');
-  const player2 = player('Player O', 'O');
+  const player1 = player('Player X', 'X', 0);
+  const player2 = player('Player O', 'O', 0);
 
-	function _setPlayerName(e, playerName, playerForm, player) {
+	function _setPlayerName(e, playerName, playerForm, player, display, score) {
     e.preventDefault();
-		const playerHeader = document.createElement('h2');
 		if (playerName == '') {
-			playerHeader.innerText = `Player ${player.gamePiece}`;
+			display.innerText = `Player ${player.gamePiece}`;
 		} else {
-			playerHeader.innerText = `${playerName}`;
+			display.innerText = `${playerName}`;
 		}
     player.name = playerName;
-		playerForm.replaceWith(playerHeader);
+    playerForm.reset();
+    playerForm.style.display = "none";
+    display.style.display = 'block';
+    score.style.display = 'block';
 	}
 
   function _autoPlayerName(player) {
-    const playerHeader = document.createElement('h2');
-		playerHeader.innerText = `Player ${player.gamePiece}`;
     if(player.gamePiece === 'X') {
-      player1Form.replaceWith(playerHeader);
+      player1Form.style.display = "none";
+      score1.style.display = "block";
+      display1.innerText = `Player ${player.gamePiece}`;
+      display1.style.display = 'block';
     } else {
-      player2Form.replaceWith(playerHeader);
+      player2Form.style.display = "none";
+      score2.style.display = "block";
+      display2.innerText = `Player ${player.gamePiece}`;
+      display2.style.display = 'block';
     }
   }
 
-	submit1.addEventListener('click', (e) => _setPlayerName(e, input1.value, player1Form, player1));
-	submit2.addEventListener('click', (e) => _setPlayerName(e, input2.value, player2Form, player2));
+  function _updateScore(player) {
+    if (player.gamePiece === 'X') {
+      score1.innerText = `Score: ${player.score}`;
+    } else {
+      score2.innerText = `Score: ${player.score}`;
+    }
+  }
+
+	submit1.addEventListener('click', (e) => _setPlayerName(e, input1.value, player1Form, player1, display1, score1));
+	submit2.addEventListener('click', (e) => _setPlayerName(e, input2.value, player2Form, player2, display2, score2));
   
 	return {
     autoName: function(player) {
       _autoPlayerName(player);
     },
-    displayWinner: function(result) {
+    displayWinner: function(result, player) {
       dim.style.display = "block";
       postGame.style.display = "block";
       winner.innerText = result;
+      _updateScore(player);
     },
     resetDisplay: function() {
       dim.style.display = "none";
       postGame.style.display = "none";
       gameCells.forEach(cell => cell.innerText = '');
+    },
+    resetPlayerInput: function() {
+      display1.style.display = 'none';
+      display2.style.display = 'none';
+      score1.style.display = 'none';
+      score2.style.display = 'none';
+      player1Form.style.display = 'flex';
+      player2Form.style.display = 'flex';
+      _updateScore(player1);
+      _updateScore(player2);
     },
     playAgain,
     reset,
@@ -88,6 +117,9 @@ const gameBoard = (function () {
 
   function _resetGame(e) {
     e.preventDefault();
+    player1.score = 0;
+    player2.score = 0;
+    displayController.resetPlayerInput();
     _resetArray();
   }
 
@@ -165,10 +197,12 @@ const gameBoard = (function () {
   function _endGame(winner) {
     switch (winner) {
       case (0):
-        displayController.displayWinner(`${player1.name} Wins!`);
+        player1.score += 1;
+        displayController.displayWinner(`${player1.name} Wins!`, player1);
         break;
       case (1):
-        displayController.displayWinner(`${player2.name} Wins!`);
+        displayController.displayWinner(`${player2.name} Wins!`, player2);
+        player2.score += 1;
         break;
       case (2):
         displayController.displayWinner(`Draw`);
@@ -195,8 +229,8 @@ const gameBoard = (function () {
 			.addEventListener('click', (e) => _placeGamePiece(e)));
 		}
     
-  displayController.playAgain.addEventListener('click', _resetGame);
-  displayController.reset.addEventListener('click', _playGameAgain);
+  displayController.reset.addEventListener('click', _resetGame);
+  displayController.playAgain.addEventListener('click', _playGameAgain);
 
 	return {
 		playGame: function() {

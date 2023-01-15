@@ -18,10 +18,6 @@ body,
     overflow: hidden;
 }
 
-h2 {
-    height: 92px;
-}
-
 /* Navbar*/
 
 .navbar {
@@ -50,6 +46,13 @@ h2 {
 #form2 {
     display: flex;
     align-items: center;
+}
+
+#x,
+#o,
+#x-score,
+#o-score {
+    display: none;
 }
 
 /* Gameboard */

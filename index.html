@@ -25,7 +25,9 @@
     <div id='main' class="container-fluid justify-content-center">
         <div class="container text-start">
             <div id="players" class="row justify-content-center">
-                <div class="col-5" align="center">
+                <div class="col-5" id="display1" align="center">
+                    <h2 id="x"></h2>
+                    <h3 id="x-score">Score: 0</h3>
                     <form id='form1' class="player-input">
                         <label for="name">Player 1: </label>
                         <input type="text" placeholder="Name for Player 1" name="name" id="name1" minlength="0" maxlength="10">
@@ -35,7 +37,9 @@
                 <div class="col-1">
                     <h2 class="text-center">Vs.</h2>
                 </div>
-                <div class="col-5" align="center">
+                <div class="col-5" id="display2" align="center">
+                    <h2 id="o"></h2>
+                    <h3 id="o-score">Score: 0</h3>
                     <form id='form2' class="player-input">
                         <label for="name">Player 2: </label>
                         <input type="text" placeholder="Name for Player 2" name="name" id="name2" minlength="0" maxlength="10">
