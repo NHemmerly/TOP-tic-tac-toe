@@ -114,22 +114,15 @@ const gameBoard = (function () {
   let player1 = displayController.player1;
   let player2 = displayController.player2;
 	
-	let currentPlayer = player1;
+	let bot = player2;
+  let player = player1;
   let aiMode = false;
   let aiBest = true;
 
   
-  function _updateArray(cellId) {
+  function _updateArray(cellId, playerBin) {
     if (gameArray[parseInt(cellId)] === " ") {
-      gameArray[parseInt(cellId)] = currentPlayer.bin;
-    }
-  }
-  
-  function _checkAi() {
-    if (aiMode) {
-      return true;
-    } else {
-      return false;
+      gameArray[parseInt(cellId)] = playerBin.bin;
     }
   }
 
@@ -182,9 +175,9 @@ const gameBoard = (function () {
       _bestAiMove();
     } else {
       let move = Math.floor(Math.random() * 9);
-      if ((_updateArray(move))) {
+      if ((_updateArray(move, bot))) {
         const aiDom = document.getElementById(String(move));
-        aiDom.innerText = currentPlayer.gamePiece;
+        aiDom.innerText = bot.gamePiece;
         _endGame(_check());
       } else {
         _aiMove();      
@@ -203,7 +196,7 @@ const gameBoard = (function () {
 
       for (let i = 0; i < goodBoard.length; i++) {
         if (goodBoard[i] === " ") {
-          goodBoard[i] = 0;
+          goodBoard[i] = bot.bin;
           let score = _minimax(goodBoard, depth + 1, false);
           goodBoard[i] = " ";
           bestScore = Math.max(score, bestScore);
@@ -216,7 +209,7 @@ const gameBoard = (function () {
 
       for (let i = 0; i < goodBoard.length; i++) {
         if (goodBoard[i] === " ") {
-          goodBoard[i] = 1;
+          goodBoard[i] = player.bin;
           let score = _minimax(goodBoard, depth + 1, true);
           goodBoard[i] = " ";
           bestScore = Math.min(score, bestScore);
@@ -228,44 +221,28 @@ const gameBoard = (function () {
 
   function _bestAiMove() {
     let bestMove;
-    if (currentPlayer == player1) {
-      let bestScore = -Infinity;
-  
-      for (let i = 0; i < gameArray.length; i++) {
-        if (gameArray[i] === " ") {
-          gameArray[i] = player1.bin;
-          let score = _minimax(gameArray, 0, false);
-          gameArray[i] = " ";
-          score = Math.max(bestScore, score);
-          bestMove = {i};
+    let bestScore = -Infinity;
+
+    for (let i = 0; i < gameArray.length; i++) {
+      if (gameArray[i] === " ") {
+        gameArray[i] = bot.bin;
+        let score = _minimax(gameArray, 0, false);
+        gameArray[i] = " ";
+        score = Math.max(bestScore, score);
+        bestMove = {i};
         }
       }
-      gameArray[bestMove.i] = player.bin;
+      gameArray[bestMove.i] = bot.bin;
       const aiDom = document.getElementById(String(bestMove.i));
-      aiDom.innerText = player1.gamePiece;
-      _endGame(_check());
-    } else if (currentPlayer == player2) {
-        let bestScore = Infinity;
-
-        for (let i = 0; i < gameArray.length; i++) {
-          if (gameArray[i] === " ") {
-            gameArray[i] = 1;
-            let score = _minimax(gameArray, 0, true);
-            gameArray[i] = " ";
-            bestScore = Math.min(score, bestScore);
-            bestMove = {i};
-          }
-        }
-      gameArray[bestMove.i] = player.bin;
-      const aiDom = document.getElementById(String(bestMove.i));
-      aiDom.innerText = player1.gamePiece;
+      aiDom.innerText = bot.gamePiece;
       _endGame(_check());
     }
-  }
+  
   
   function _resetArray() {
     gameArray = [...Array(9).fill(" ")];
-    currentPlayer = player1;
+    player = player1;
+    bot = player2;
     displayController.resetDisplay();
   }
   
@@ -280,7 +257,7 @@ const gameBoard = (function () {
   function _playGameAgain(e) {
     e.preventDefault();
     _resetArray();
-    if (aiMode === true) {
+    if (aiMode === true && bot === player1) {
       _bestAiMove();
     }
   }
@@ -290,12 +267,16 @@ const gameBoard = (function () {
     aiMode = true;
     const aiName = e.target.id;
     if (aiName == 'ai-x') {
+      bot = player1;
+      player = player2;      
       player1.name = aiName;
       displayController.autoName(player1);
       _aiMove();
     } else {
       player2.name = aiName;
       displayController.autoName(player2);
+      bot = player2;
+      player = player1;
     }
   }
 
@@ -319,19 +300,16 @@ const gameBoard = (function () {
     const clickedId = e.target.id;
     const clickedBox = document.getElementById(clickedId);
     if (!(clickedBox.innerText === 'X' || clickedBox.innerText === 'O')) {
-      e.target.innerText = currentPlayer.gamePiece;
-      _updateArray(clickedId);
+      e.target.innerText = player.gamePiece;
+      _updateArray(clickedId, player);
       console.log(gameArray);
       _endGame(_check());
       displayController.autoName(player1);
       displayController.autoName(player2);
-      if (currentPlayer == player1) {
-        currentPlayer = player2;
-      } else {
-        currentPlayer = player1;
-      }
-      if (_checkAi() === true) {
+      if (aiMode === true) {
           _aiMove();
+        } else {
+          (player === player1) ? player = player2 : player = player1;
         }
       console.log(gameArray);
     }
