@@ -114,18 +114,15 @@ const gameBoard = (function () {
   let player1 = displayController.player1;
   let player2 = displayController.player2;
 	
-	let prevTurn = 1;
+	let currentPlayer = player1;
   let aiMode = false;
-  let currentAi = " ";
   let aiBest = true;
 
   
   function _updateArray(cellId) {
     if (gameArray[parseInt(cellId)] === " ") {
-      gameArray[parseInt(cellId)] = prevTurn;
-      return true;
+      gameArray[parseInt(cellId)] = currentPlayer.bin;
     }
-    return false;
   }
   
   function _checkAi() {
@@ -136,82 +133,77 @@ const gameBoard = (function () {
     }
   }
 
-  function _check(prevTurn) {
+  function equals3 (a, b, c) {
+    return a === b && b === c && a !== " ";
+  }
+
+  function _check() {
     const cols = [[0,3,6], [1,4,7], [2,5,8]];
     const rows = [[0,1,2], [3,4,5], [6,7,8]];
     const diag = [[0, 4, 8], [2, 4, 6]];
-    let count = 0;
+    let winner = null;
 
     //Columns
     for (let col of cols) {
-      count = 0;
-      for (let cell of col) {
-        if (gameArray[cell] === parseInt(prevTurn)){
-        count++;
-        }
-      }	
-      if (count === 3) {
-        return prevTurn;
+      if (equals3(gameArray[col[0]], gameArray[col[1]], gameArray[col[2]])){
+        winner = gameArray[col[0]];
       }
-    }
+    }	
 
     //Rows
     for (let row of rows) {
-      count = 0;
-      for (let cell of row) {
-        if (gameArray[cell] === parseInt(prevTurn)){
-        count++;
-        }
-      }
-      if (count === 3) {
-        return prevTurn;
+      if(equals3(gameArray[row[0]], gameArray[row[1]], gameArray[row[2]])) {
+        winner = gameArray[row[0]];
       }
     }
 
     //Diags
     for (let dia of diag) {
-      count = 0;
-      for (let cell of dia) {
-        if (gameArray[cell] === parseInt(prevTurn)){
-        count++;
-        }
+      if(equals3(gameArray[dia[0]], gameArray[dia[1]], gameArray[dia[2]])) {
+        winner = gameArray[dia[0]];
       }
-      if (count === 3) {
-        return prevTurn;
-        }
     }
 
-    if (!(gameArray.includes(" "))) {
+    if (!(gameArray.includes(" ")) && winner == null) {
       return 2;
+    } else {
+      return winner;
     }
   }
 
-  function _aiMove(piece) {
-    let move = Math.floor(Math.random() * 9);
-    if ((_updateArray(move))) {
-      const aiDom = document.getElementById(String(move));
-      aiDom.innerText = piece;
-      _endGame(_check(prevTurn));
+  let scores = {
+    0: 10,
+    1: -10,
+    2: 0
+  }
+
+  function _aiMove() {
+    if (aiBest) {
+      _bestAiMove();
     } else {
-      _aiMove(piece);      
+      let move = Math.floor(Math.random() * 9);
+      if ((_updateArray(move))) {
+        const aiDom = document.getElementById(String(move));
+        aiDom.innerText = currentPlayer.gamePiece;
+        _endGame(_check());
+      } else {
+        _aiMove();      
+      }
     }
   }
 
   function _minimax(goodBoard, depth, isMaximizing) {
-    if (_check(player1.bin) === 0) {
-      return 1;
-    } else if (_check(player2.bin) === 1) {
-      return -1;
-    } else if (_check(prevTurn) === 2) {
-      return 0;
-    } 
+    let result = _check();
+    if (result !== null) {
+      return scores[result];
+    }
 
     if (isMaximizing === true) {
       let bestScore = -Infinity;
 
       for (let i = 0; i < goodBoard.length; i++) {
         if (goodBoard[i] === " ") {
-          goodBoard[i] = player1.bin;
+          goodBoard[i] = 0;
           let score = _minimax(goodBoard, depth + 1, false);
           goodBoard[i] = " ";
           bestScore = Math.max(score, bestScore);
@@ -224,7 +216,7 @@ const gameBoard = (function () {
 
       for (let i = 0; i < goodBoard.length; i++) {
         if (goodBoard[i] === " ") {
-          goodBoard[i] = player2.bin;
+          goodBoard[i] = 1;
           let score = _minimax(goodBoard, depth + 1, true);
           goodBoard[i] = " ";
           bestScore = Math.min(score, bestScore);
@@ -234,31 +226,46 @@ const gameBoard = (function () {
     }
   }
 
-  function _bestAiMove(piece) {
-    let bestScore = -Infinity;
+  function _bestAiMove() {
     let bestMove;
-
-    for (let i = 0; i < gameArray.length; i++) {
-      if (gameArray[i] === " ") {
-        gameArray[i] = player1.bin;
-        let score = _minimax(gameArray, 0, false);
-        gameArray[i] = " ";
-        if(score > bestScore) {
-          bestScore = score;
-          bestMove = i;
+    if (currentPlayer == player1) {
+      let bestScore = -Infinity;
+  
+      for (let i = 0; i < gameArray.length; i++) {
+        if (gameArray[i] === " ") {
+          gameArray[i] = player1.bin;
+          let score = _minimax(gameArray, 0, false);
+          gameArray[i] = " ";
+          score = Math.max(bestScore, score);
+          bestMove = {i};
         }
       }
-    }
+      gameArray[bestMove.i] = player.bin;
+      const aiDom = document.getElementById(String(bestMove.i));
+      aiDom.innerText = player1.gamePiece;
+      _endGame(_check());
+    } else if (currentPlayer == player2) {
+        let bestScore = Infinity;
 
-    _updateArray(bestMove);
-    const aiDom = document.getElementById(String(bestMove));
-    aiDom.innerText = piece;
-    _endGame(_check(prevTurn));
+        for (let i = 0; i < gameArray.length; i++) {
+          if (gameArray[i] === " ") {
+            gameArray[i] = 1;
+            let score = _minimax(gameArray, 0, true);
+            gameArray[i] = " ";
+            bestScore = Math.min(score, bestScore);
+            bestMove = {i};
+          }
+        }
+      gameArray[bestMove.i] = player.bin;
+      const aiDom = document.getElementById(String(bestMove.i));
+      aiDom.innerText = player1.gamePiece;
+      _endGame(_check());
+    }
   }
   
   function _resetArray() {
     gameArray = [...Array(9).fill(" ")];
-    prevTurn = 1;
+    currentPlayer = player1;
     displayController.resetDisplay();
   }
   
@@ -273,38 +280,24 @@ const gameBoard = (function () {
   function _playGameAgain(e) {
     e.preventDefault();
     _resetArray();
-    if (aiMode === true && currentAi.name === "ai-x") {
-      _aiMove(_currentPlayer().gamePiece);
+    if (aiMode === true) {
+      _bestAiMove();
     }
   }
   
   function _enableAi(e) {
     e.preventDefault();
+    aiMode = true;
     const aiName = e.target.id;
     if (aiName == 'ai-x') {
-      currentAi = player1;
-      currentAi.name = aiName;
-      displayController.autoName(currentAi);
-      _aiMove(_currentPlayer().gamePiece);
+      player1.name = aiName;
+      displayController.autoName(player1);
+      _aiMove();
     } else {
-      currentAi = player2;
-      currentAi.name = aiName;
-      displayController.autoName(currentAi);
+      player2.name = aiName;
+      displayController.autoName(player2);
     }
-    currentAi.name = aiName;
-    displayController.autoName(currentAi);
-    aiMode = true;
   }
-
-	function _currentPlayer() {
-		if (prevTurn === 1) {
-			prevTurn = 0;
-			return player1;
-		} else {
-			prevTurn = 1;
-			return player2;
-		}
-	}
 
   function _endGame(winner) {
     switch (winner) {
@@ -325,26 +318,25 @@ const gameBoard = (function () {
   function _placeGamePiece(e) {
     const clickedId = e.target.id;
     const clickedBox = document.getElementById(clickedId);
-
     if (!(clickedBox.innerText === 'X' || clickedBox.innerText === 'O')) {
-      e.target.innerText = _currentPlayer().gamePiece;
+      e.target.innerText = currentPlayer.gamePiece;
       _updateArray(clickedId);
       console.log(gameArray);
-      _endGame(_check(prevTurn));
+      _endGame(_check());
       displayController.autoName(player1);
       displayController.autoName(player2);
-      if (_checkAi() === true) {
-        let piece = _currentPlayer().gamePiece;
-        if (aiBest === true) {
-          _bestAiMove(piece);
-          console.log(gameArray);
-        } else {
-          _aiMove(piece);
-        }
-        console.log(gameArray);
+      if (currentPlayer == player1) {
+        currentPlayer = player2;
+      } else {
+        currentPlayer = player1;
       }
+      if (_checkAi() === true) {
+          _aiMove();
+        }
+      console.log(gameArray);
     }
   }
+  
   
 	function _gameFlow() {
     displayController.gameCells
