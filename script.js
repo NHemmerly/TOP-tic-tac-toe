@@ -190,7 +190,6 @@ const gameBoard = (function () {
     if (result !== null) {
       return scores[result];
     }
-    let score;
 
     if (isMaximizing) {
       let bestScore = -100;
@@ -198,7 +197,7 @@ const gameBoard = (function () {
       for (let i = 0; i < 9; i++) {
         if (goodBoard[i] === " ") {
           goodBoard[i] = player.bin;
-          score = _minimax(goodBoard, depth + 1, false);
+          let score = _minimax(goodBoard, depth + 1, false);
           goodBoard[i] = " ";
           bestScore = Math.max(parseInt(score), parseInt(bestScore));
         }
@@ -212,7 +211,7 @@ const gameBoard = (function () {
       for (let i = 0; i < 9; i++) {
         if (goodBoard[i] === " ") {
           goodBoard[i] = bot.bin;
-          score = _minimax(goodBoard, depth + 1, true);
+          let score = _minimax(goodBoard, depth + 1, true);
           goodBoard[i] = " ";
           bestScore = Math.min(parseInt(score), parseInt(bestScore));
         }
@@ -231,9 +230,10 @@ const gameBoard = (function () {
         gameArray[i] = bot.bin;
         score = _minimax(gameArray, 0, false);
         gameArray[i] = " ";
-        score = Math.max(parseInt(bestScore), parseInt(score));
-        console.log(score);
-        bestMove = {i};
+        if (score > bestScore) {
+          bestScore = score;
+          bestMove = {i};
+        }
       }
     }
       console.log(bestMove.i);
