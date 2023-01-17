@@ -202,7 +202,6 @@ const gameBoard = (function () {
           bestScore = Math.max(parseInt(score), parseInt(bestScore));
         }
       }
-      console.log(bestScore);
       return bestScore;
     }
     else {
@@ -222,21 +221,36 @@ const gameBoard = (function () {
 
   function _bestAiMove() {
     let bestMove;
-    let bestScore = -100;
     let score;
 
-    for (let i = 0; i < 9; i++) {
-      if (gameArray[i] === " ") {
-        gameArray[i] = bot.bin;
-        score = _minimax(gameArray, 0, false);
-        gameArray[i] = " ";
-        if (score > bestScore) {
-          bestScore = score;
-          bestMove = {i};
+    if (bot == player1) {
+      let bestScore = -100;
+  
+      for (let i = 0; i < 9; i++) {
+        if (gameArray[i] === " ") {
+          gameArray[i] = bot.bin;
+          score = _minimax(gameArray, 0, false);
+          gameArray[i] = " ";
+          if (score > bestScore) {
+            bestScore = score;
+            bestMove = {i};
+          }
+        }
+      }
+    } else {
+      let bestScore = 100;
+      for (let i = 0; i < 9; i++) {
+        if (gameArray[i] === " ") {
+          gameArray[i] = bot.bin;
+          score = _minimax(gameArray, 0, true);
+          gameArray[i] = " ";
+          if (score < bestScore) {
+            bestScore = score;
+            bestMove = {i};
+          }
         }
       }
     }
-      console.log(bestMove.i);
       gameArray[bestMove.i] = bot.bin;
       const aiDom = document.getElementById(String(bestMove.i));
       aiDom.innerText = bot.gamePiece;
@@ -246,8 +260,6 @@ const gameBoard = (function () {
   
   function _resetArray() {
     gameArray = [...Array(9).fill(" ")];
-    player = player1;
-    bot = player2;
     displayController.resetDisplay();
   }
   
@@ -256,6 +268,8 @@ const gameBoard = (function () {
     player1.score = 0;
     player2.score = 0;
     displayController.resetPlayerInput();
+    player = player1;
+    bot = player2;
     _resetArray();
   }
   
@@ -307,7 +321,6 @@ const gameBoard = (function () {
     if (!(clickedBox.innerText === 'X' || clickedBox.innerText === 'O')) {
       e.target.innerText = player.gamePiece;
       _updateArray(clickedId, player);
-      console.log(gameArray);
       _endGame(_check());
       displayController.autoName(player1);
       displayController.autoName(player2);
@@ -316,7 +329,6 @@ const gameBoard = (function () {
         } else {
           (player === player1) ? player = player2 : player = player1;
         }
-      console.log(gameArray);
     }
   }
   
