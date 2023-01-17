@@ -36,6 +36,7 @@ const displayController = (function () {
 			display.innerText = `Player ${player.gamePiece}`;
 		} else {
 			display.innerText = `${playerName}`;
+      player.name = playerName;
 		}
     playerForm.reset();
     playerForm.style.display = "none";
@@ -268,6 +269,8 @@ const gameBoard = (function () {
     player1.score = 0;
     player2.score = 0;
     displayController.resetPlayerInput();
+    displayController.aiO.style.display = 'block';
+    displayController.aiX.style.display = 'block';
     player = player1;
     bot = player2;
     _resetArray();
