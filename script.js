@@ -157,7 +157,7 @@ const gameBoard = (function () {
       }
     }
 
-    if (!(gameArray.includes(" ")) && winner == null) {
+    if (!(gameArray.includes(" ")) && winner === null) {
       return 2;
     } else {
       return winner;
@@ -165,8 +165,8 @@ const gameBoard = (function () {
   }
 
   let scores = {
-    0: 10,
-    1: -10,
+    0: 1,
+    1: -1,
     2: 0
   }
 
@@ -190,29 +190,31 @@ const gameBoard = (function () {
     if (result !== null) {
       return scores[result];
     }
+    let score;
 
-    if (isMaximizing === true) {
-      let bestScore = -Infinity;
+    if (isMaximizing) {
+      let bestScore = -100;
 
-      for (let i = 0; i < goodBoard.length; i++) {
+      for (let i = 0; i < 9; i++) {
         if (goodBoard[i] === " ") {
-          goodBoard[i] = bot.bin;
-          let score = _minimax(goodBoard, depth + 1, false);
+          goodBoard[i] = player.bin;
+          score = _minimax(goodBoard, depth + 1, false);
           goodBoard[i] = " ";
-          bestScore = Math.max(score, bestScore);
+          bestScore = Math.max(parseInt(score), parseInt(bestScore));
         }
       }
+      console.log(bestScore);
       return bestScore;
     }
     else {
-      let bestScore = Infinity;
+      let bestScore = 100;
 
-      for (let i = 0; i < goodBoard.length; i++) {
+      for (let i = 0; i < 9; i++) {
         if (goodBoard[i] === " ") {
-          goodBoard[i] = player.bin;
-          let score = _minimax(goodBoard, depth + 1, true);
+          goodBoard[i] = bot.bin;
+          score = _minimax(goodBoard, depth + 1, true);
           goodBoard[i] = " ";
-          bestScore = Math.min(score, bestScore);
+          bestScore = Math.min(parseInt(score), parseInt(bestScore));
         }
       }
       return bestScore;
@@ -221,17 +223,20 @@ const gameBoard = (function () {
 
   function _bestAiMove() {
     let bestMove;
-    let bestScore = -Infinity;
+    let bestScore = -100;
+    let score;
 
-    for (let i = 0; i < gameArray.length; i++) {
+    for (let i = 0; i < 9; i++) {
       if (gameArray[i] === " ") {
         gameArray[i] = bot.bin;
-        let score = _minimax(gameArray, 0, false);
+        score = _minimax(gameArray, 0, false);
         gameArray[i] = " ";
-        score = Math.max(bestScore, score);
+        score = Math.max(parseInt(bestScore), parseInt(score));
+        console.log(score);
         bestMove = {i};
-        }
       }
+    }
+      console.log(bestMove.i);
       gameArray[bestMove.i] = bot.bin;
       const aiDom = document.getElementById(String(bestMove.i));
       aiDom.innerText = bot.gamePiece;
