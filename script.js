@@ -292,12 +292,14 @@ const gameBoard = (function () {
       player = player2;      
       player1.name = aiName;
       displayController.autoName(player1);
+      displayController.aiO.style.display = 'none';
       _aiMove();
     } else {
       player2.name = aiName;
       displayController.autoName(player2);
       bot = player2;
       player = player1;
+      displayController.aiX.style.display = 'none';
     }
   }
 
