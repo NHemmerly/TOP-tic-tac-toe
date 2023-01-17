@@ -278,6 +278,8 @@ const gameBoard = (function () {
     _resetArray();
     if (aiMode === true && bot === player1) {
       _bestAiMove();
+    } else {
+      player = player1;
     }
   }
   
