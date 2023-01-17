@@ -3,6 +3,7 @@
 /* Stylesheet for TOP-tic-tac-toe */
 
 :root {
+    font-family: 'Roboto', Arial, Helvetica, sans-serif;
     --nav-bg: #64748b;
     --game-bg: #cbd5e1;
     --light-text: #f8fafc;

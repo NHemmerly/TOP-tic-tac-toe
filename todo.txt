@@ -1,7 +1,1 @@
-1. Wire up input sections to functions
-    a. write additional function that replaces form with a header
-    showing the player's
-
-2. Enable ai
-    a. Only one ai can be enabled at a time. 
-    b. When an Ai is selected, the game knows which gamePiece it has 
+Project complete :)

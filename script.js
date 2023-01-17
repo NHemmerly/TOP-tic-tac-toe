@@ -22,7 +22,9 @@ const displayController = (function () {
   const postGame = document.querySelector(".winner-play-game");
 
   const aiX = document.getElementById('ai-x');
+  const hardX = document.getElementById('hard-x');
   const aiO = document.getElementById('ai-o');
+  const hardO = document.getElementById('hard-o');
  
   const playAgain = document.getElementById("play-again");
   const reset = document.getElementById("reset");
@@ -44,6 +46,8 @@ const displayController = (function () {
     score.style.display = 'block';
 	}
 
+  //Automatically name players when the first move is made
+
   function _autoPlayerName(player) {
     if(player.gamePiece === 'X') {
       player1Form.style.display = "none";
@@ -57,6 +61,8 @@ const displayController = (function () {
       display2.style.display = 'block';
     }
   }
+
+  //Updates the display for player score
 
   function _updateScore(player) {
     if (player == null) {
@@ -103,33 +109,45 @@ const displayController = (function () {
     player1,
     player2,
     aiX,
-    aiO
+    aiO,
+    hardO,
+    hardX
 	};
-
+  
 }());
 
 
 const gameBoard = (function () {
-	let gameArray = [...Array(9).fill(" ")];
-
+  let gameArray = [...Array(9).fill(" ")];
+  
   let player1 = displayController.player1;
   let player2 = displayController.player2;
 	
 	let bot = player2;
   let player = player1;
   let aiMode = false;
-  let aiBest = true;
-
+  let aiBest = false;
   
+  let scores = {
+    0: 1,
+    1: -1,
+    2: 0
+  }
+  //Functions that affect the array in some way.
+
   function _updateArray(cellId, playerBin) {
     if (gameArray[parseInt(cellId)] === " ") {
       gameArray[parseInt(cellId)] = playerBin.bin;
     }
   }
 
-  function equals3 (a, b, c) {
+  //Helper function for detecting win in check()
+
+  function _equals3 (a, b, c) {
     return a === b && b === c && a !== " ";
   }
+
+  //Checks the array for a win at any given position
 
   function _check() {
     const cols = [[0,3,6], [1,4,7], [2,5,8]];
@@ -139,21 +157,21 @@ const gameBoard = (function () {
 
     //Columns
     for (let col of cols) {
-      if (equals3(gameArray[col[0]], gameArray[col[1]], gameArray[col[2]])){
+      if (_equals3(gameArray[col[0]], gameArray[col[1]], gameArray[col[2]])){
         winner = gameArray[col[0]];
       }
     }	
 
     //Rows
     for (let row of rows) {
-      if(equals3(gameArray[row[0]], gameArray[row[1]], gameArray[row[2]])) {
+      if(_equals3(gameArray[row[0]], gameArray[row[1]], gameArray[row[2]])) {
         winner = gameArray[row[0]];
       }
     }
 
     //Diags
     for (let dia of diag) {
-      if(equals3(gameArray[dia[0]], gameArray[dia[1]], gameArray[dia[2]])) {
+      if(_equals3(gameArray[dia[0]], gameArray[dia[1]], gameArray[dia[2]])) {
         winner = gameArray[dia[0]];
       }
     }
@@ -165,12 +183,8 @@ const gameBoard = (function () {
     }
   }
 
-  let scores = {
-    0: 1,
-    1: -1,
-    2: 0
-  }
-
+    //functions related to ai Movements
+    //Decides how to move the Ai based on whether it is smart or not
   function _aiMove() {
     if (aiBest) {
       _bestAiMove();
@@ -185,7 +199,7 @@ const gameBoard = (function () {
       }
     }
   }
-
+    //The minimax algorithm for allowing the AI to pick the best moves
   function _minimax(goodBoard, depth, isMaximizing) {
     let result = _check();
     if (result !== null) {
@@ -219,7 +233,7 @@ const gameBoard = (function () {
       return bestScore;
     }
   }
-
+  //Implements minimax algorithm depending on which player is AI
   function _bestAiMove() {
     let bestMove;
     let score;
@@ -257,8 +271,29 @@ const gameBoard = (function () {
       aiDom.innerText = bot.gamePiece;
       _endGame(_check());
     }
+
+  function _enableAi(e, hard) {
+    e.preventDefault();
+    aiBest = hard;
+    aiMode = true;
+    const aiName = e.target.id;
+    if (aiName == 'ai-x' || aiName == 'hard-x') {
+      bot = player1;
+      player = player2;      
+      player1.name = aiName;
+      displayController.autoName(player1);
+      displayController.aiO.style.display = 'none';
+      _aiMove();
+    } else {
+      player2.name = aiName;
+      displayController.autoName(player2);
+      bot = player2;
+      player = player1;
+      displayController.aiX.style.display = 'none';
+    }
+  }
   
-  
+  //Functions for resetting the game and array
   function _resetArray() {
     gameArray = [...Array(9).fill(" ")];
     displayController.resetDisplay();
@@ -285,26 +320,6 @@ const gameBoard = (function () {
       player = player1;
     }
   }
-  
-  function _enableAi(e) {
-    e.preventDefault();
-    aiMode = true;
-    const aiName = e.target.id;
-    if (aiName == 'ai-x') {
-      bot = player1;
-      player = player2;      
-      player1.name = aiName;
-      displayController.autoName(player1);
-      displayController.aiO.style.display = 'none';
-      _aiMove();
-    } else {
-      player2.name = aiName;
-      displayController.autoName(player2);
-      bot = player2;
-      player = player1;
-      displayController.aiX.style.display = 'none';
-    }
-  }
 
   function _endGame(winner) {
     switch (winner) {
@@ -321,6 +336,8 @@ const gameBoard = (function () {
         break;
       }
   }
+
+  //Function for placing a game piece and determining when the AI needs to move
 
   function _placeGamePiece(e) {
     const clickedId = e.target.id;
@@ -348,8 +365,10 @@ const gameBoard = (function () {
     
   displayController.reset.addEventListener('click', _resetGame);
   displayController.playAgain.addEventListener('click', _playGameAgain);
-  displayController.aiX.addEventListener('click', _enableAi);
-  displayController.aiO.addEventListener('click', _enableAi);
+  displayController.aiX.addEventListener('click',(e) =>  _enableAi(e, false));
+  displayController.hardX.addEventListener('click', (e) => _enableAi(e, true));
+  displayController.aiO.addEventListener('click', (e) => _enableAi(e, false));
+  displayController.hardO.addEventListener('click', (e) => _enableAi(e, true));
 
 	return {
 		playGame: function() {
