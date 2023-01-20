@@ -312,6 +312,8 @@ const gameBoard = (function () {
     displayController.resetPlayerInput();
     displayController.aiO.style.display = 'block';
     displayController.aiX.style.display = 'block';
+	displayController.hardX.style.display = 'block';
+	displayController.hardO.style.display = 'block';
     player = player1;
     bot = player2;
     _resetArray();
