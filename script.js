@@ -10,27 +10,27 @@ const displayController = (function () {
 	const input2 = document.getElementById('name2');
 	const gameCells = document.querySelectorAll('.game-cell');
 	const player1Form = document.getElementById('form1');
-  const display1 = document.getElementById('x');
-  const score1 = document.getElementById('x-score');
+	const display1 = document.getElementById('x');
+	const score1 = document.getElementById('x-score');
 	const player2Form = document.getElementById('form2');
-  const display2 = document.getElementById('o');
-  const score2 = document.getElementById('o-score');
+	const display2 = document.getElementById('o');
+	const score2 = document.getElementById('o-score');
 	const submit1 = document.getElementById('submit1');
 	const submit2 = document.getElementById('submit2');
-  const dim = document.getElementById('dim');
-  const winner = document.getElementById('display-winner');
-  const postGame = document.querySelector(".winner-play-game");
+	const dim = document.getElementById('dim');
+	const winner = document.getElementById('display-winner');
+	const postGame = document.querySelector(".winner-play-game");
 
-  const aiX = document.getElementById('ai-x');
-  const hardX = document.getElementById('hard-x');
-  const aiO = document.getElementById('ai-o');
-  const hardO = document.getElementById('hard-o');
- 
-  const playAgain = document.getElementById("play-again");
-  const reset = document.getElementById("reset");
+	const aiX = document.getElementById('ai-x');
+	const hardX = document.getElementById('hard-x');
+	const aiO = document.getElementById('ai-o');
+	const hardO = document.getElementById('hard-o');
 
-  const player1 = player('Player X', 'X', 0, 0);
-  const player2 = player('Player O', 'O', 0, 1);
+	const playAgain = document.getElementById("play-again");
+	const reset = document.getElementById("reset");
+
+	const player1 = player('Player X', 'X', 0, 0);
+	const player2 = player('Player O', 'O', 0, 1);
 
 	function _setPlayerName(e, playerName, playerForm, player, display, score) {
     e.preventDefault();
@@ -105,7 +105,7 @@ const displayController = (function () {
     },
     playAgain,
     reset,
-		gameCells,
+	gameCells,
     player1,
     player2,
     aiX,
@@ -138,7 +138,11 @@ const gameBoard = (function () {
   function _updateArray(cellId, playerBin) {
     if (gameArray[parseInt(cellId)] === " ") {
       gameArray[parseInt(cellId)] = playerBin.bin;
-    }
+	  return true;
+    } else {
+		return false;
+	}
+	
   }
 
   //Helper function for detecting win in check()
@@ -211,7 +215,7 @@ const gameBoard = (function () {
 
       for (let i = 0; i < 9; i++) {
         if (goodBoard[i] === " ") {
-          goodBoard[i] = player.bin;
+          goodBoard[i] = player1.bin;
           let score = _minimax(goodBoard, depth + 1, false);
           goodBoard[i] = " ";
           bestScore = Math.max(parseInt(score), parseInt(bestScore));
@@ -224,7 +228,7 @@ const gameBoard = (function () {
 
       for (let i = 0; i < 9; i++) {
         if (goodBoard[i] === " ") {
-          goodBoard[i] = bot.bin;
+          goodBoard[i] = player2.bin;
           let score = _minimax(goodBoard, depth + 1, true);
           goodBoard[i] = " ";
           bestScore = Math.min(parseInt(score), parseInt(bestScore));
@@ -283,6 +287,7 @@ const gameBoard = (function () {
       player1.name = aiName;
       displayController.autoName(player1);
       displayController.aiO.style.display = 'none';
+	  displayController.hardO.style.display = 'none';
       _aiMove();
     } else {
       player2.name = aiName;
@@ -290,6 +295,7 @@ const gameBoard = (function () {
       bot = player2;
       player = player1;
       displayController.aiX.style.display = 'none';
+	  displayController.hardX.style.display = 'none';
     }
   }
   
